@@ -1,3 +1,6 @@
+import tensorflow as tf
+import seaborn as sns
+
 def divided_box_hist_plot(series, y):
     labels = y.unique()
     gs_kw = dict(width_ratios=[.5, .5], height_ratios=[.15, .85])
