@@ -1,3 +1,17 @@
+def divided_box_hist_plot(series, y):
+    labels = y.unique()
+    gs_kw = dict(width_ratios=[.5, .5], height_ratios=[.15, .85])
+    f, ax = plt.subplots(2, 2, sharex=True, gridspec_kw=gs_kw)
+    sns.boxplot(series[y==labels[0]], color="red", ax=ax[0][0])
+    sns.boxplot(series[y==labels[1]], color="blue", ax=ax[0][1])
+    ax[0][0].set(xlabel="")
+    ax[0][1].set(xlabel="")
+    sns.distplot(series[y==labels[0]].dropna(), color="red", ax=ax[1][0], kde=False)
+    sns.distplot(series[y==labels[1]].dropna(), color="blue", ax=ax[1][1], kde=False)
+    ax[1][0].set(xlabel=f"{series.name} ({labels[0]})")
+    ax[1][1].set(xlabel=f"{series.name} ({labels[1]})")
+    plt.show()
+    
 # Membuat fugsi untuk plot roc curve
 def plot_roc_curve(fprs, tprs):
     """Plot the Receiver Operating Characteristic from a list
@@ -162,19 +176,6 @@ def make_confusion_matrix(y_true, y_pred, classes=None, figsize=(10, 10), text_s
   if savefig:
     fig.savefig("confusion_matrix.png")
 
- def divided_box_hist_plot(series, y):
-    labels = y.unique()
-    gs_kw = dict(width_ratios=[.5, .5], height_ratios=[.15, .85])
-    f, ax = plt.subplots(2, 2, sharex=True, gridspec_kw=gs_kw)
-    sns.boxplot(series[y==labels[0]], color="red", ax=ax[0][0])
-    sns.boxplot(series[y==labels[1]], color="blue", ax=ax[0][1])
-    ax[0][0].set(xlabel="")
-    ax[0][1].set(xlabel="")
-    sns.distplot(series[y==labels[0]].dropna(), color="red", ax=ax[1][0], kde=False)
-    sns.distplot(series[y==labels[1]].dropna(), color="blue", ax=ax[1][1], kde=False)
-    ax[1][0].set(xlabel=f"{series.name} ({labels[0]})")
-    ax[1][1].set(xlabel=f"{series.name} ({labels[1]})")
-    plt.show()
   
 # Make a function to predict on images and plot them (works with multi-class)
 def pred_and_plot(model, filename, class_names):
