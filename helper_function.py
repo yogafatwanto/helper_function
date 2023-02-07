@@ -380,6 +380,17 @@ def plot_time_series(timesteps, values, format='.', start=0, end=None, label=Non
   plt.grid(True)
 
 
+# MASE implemented courtesy of sktime - https://github.com/alan-turing-institute/sktime/blob/ee7a06843a44f4aaec7582d847e36073a9ab0566/sktime/performance_metrics/forecasting/_functions.py#L16
+def mean_absolute_scaled_error(y_true, y_pred):
+  """
+  Implement MASE (assuming no seasonality of data).
+  """
+  mae = tf.reduce_mean(tf.abs(y_true - y_pred))
+
+  # Find MAE of naive forecast (no seasonality)
+  mae_naive_no_season = tf.reduce_mean(tf.abs(y_true[1:] - y_true[:-1])) # our seasonality is 1 day (hence the shifting of 1 day)
+
+  return mae / mae_naive_no_season
 
 def evaluate_preds(y_true, y_pred):
   # Make sure float32 (for metric calculations)
