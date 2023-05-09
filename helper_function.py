@@ -1,5 +1,22 @@
-import tensorflow as tf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 import seaborn as sns
+import tensorflow as tf
+
+from scipy.special import softmax
+from sklearn import metrics
+from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold
+from sklearn.metrics import accuracy_score, precision_score,recall_score,r2_score, f1_score, classification_report,roc_auc_score,auc,roc_curve
+
+def get_auc(model,model_name, X_train, y_train, X_test, y_test):
+    model.fit(X_train, y_train)
+    y_pred = model.predict_proba(X_test)[:, 1]
+    fpr, tpr, _ = metrics.roc_curve(y_test, y_pred)
+    auc = round(metrics.roc_auc_score(y_test, y_pred), 4)
+    plt.plot(fpr,tpr,label=f"{model_name}, AUC="+str(auc))
+    plt.legend()
+    return auc
 
 def divided_box_hist_plot(series, y):
     labels = y.unique()
@@ -72,7 +89,66 @@ def compute_roc_auc(index):
     return fpr, tpr, auc_score
 
 
+def get_information_values(data, target, bins=10, show_woe=False):
+    
+    #Empty Dataframe
+    data_iv, data_woe = pd.DataFrame(), pd.DataFrame()
+    
+    #Extract Column Names
+    cols = data.columns
+    
+    #Run WOE and IV on all the independent variables
+    for ivars in cols[~cols.isin([target])]:
+        if (data[ivars].dtype.kind in 'bifc') and (len(np.unique(data[ivars]))>10):
+            binned_x = pd.qcut(data[ivars], bins,  duplicates='drop')
+            d0 = pd.DataFrame({'x': binned_x, 'y': data[target]})
+        else:
+            d0 = pd.DataFrame({'x': data[ivars], 'y': data[target]})
+        d = d0.groupby("x", as_index=False).agg({"y": ["count", "sum"]})
+        d.columns = ['Cutoff', 'N', 'Events']
+        d['% of Events'] = np.maximum(d['Events'], 0.5) / d['Events'].sum()
+        d['Non-Events'] = d['N'] - d['Events']
+        d['% of Non-Events'] = np.maximum(d['Non-Events'], 0.5) / d['Non-Events'].sum()
+        d['WoE'] = np.log(d['% of Events']/d['% of Non-Events'])
+        d['IV'] = d['WoE'] * (d['% of Events'] - d['% of Non-Events'])
+        d.insert(loc=0, column='Variable', value=ivars)
+        print("Information value of " + ivars + " is " + str(round(d['IV'].sum(),6)))
+        temp = pd.DataFrame({"Variable" : [ivars], "IV" : [d['IV'].sum()]}, columns = ["Variable", "IV"])
+        data_iv = pd.concat([data_iv, temp], axis=0)
+        data_woe = pd.concat([data_woe, d], axis=0)
 
+        #Show WOE Table
+        if show_woe == True:
+            print(d)
+
+    return data_iv, data_woe    
+    
+    
+from scipy.special import softmax
+
+def print_feature_importances_shap_values(shap_values, features):
+    '''
+    Prints the feature importances based on SHAP values in an ordered way
+    shap_values -> The SHAP values calculated from a shap.Explainer object
+    features -> The name of the features, on the order presented to the explainer
+    '''
+    # Calculates the feature importance (mean absolute shap value) for each feature
+    importances = []
+    for i in range(shap_values.values.shape[1]):
+        importances.append(np.mean(np.abs(shap_values.values[:, i])))
+    # Calculates the normalized version
+    importances_norm = softmax(importances)
+    # Organize the importances and columns in a dictionary
+    feature_importances = {fea: imp for imp, fea in zip(importances, features)}
+    feature_importances_norm = {fea: imp for imp, fea in zip(importances_norm, features)}
+    # Sorts the dictionary
+    feature_importances = {k: v for k, v in sorted(feature_importances.items(), key=lambda item: item[1], reverse = True)}
+    feature_importances_norm= {k: v for k, v in sorted(feature_importances_norm.items(), key=lambda item: item[1], reverse = True)}
+    # Prints the feature importances
+    for k, v in feature_importances.items():
+        print(f"{k} -> {v:.4f} (softmax = {feature_importances_norm[k]:.4f})")
+        
+        
 # Create a function to import an image and resize it to be able to be used with our model
 def load_and_prep_image(filename, img_shape=224, scale=True):
   """
