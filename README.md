@@ -9,9 +9,9 @@ Repositori ini menyediakan berbagai fungsi yang dapat digunakan untuk memudahkan
 Beberapa fitur dan fungsi yang dapat ditemukan dalam repositori ini meliputi:
 
 - Pembuatan plot untuk visualisasi data.
-- Tampilan gambar dalam format yang sesuai.
+- Menampilkan gambar (tugas deep learning).
 - Perhitungan metrik untuk evaluasi model.
-- Rekayasa fitur untuk meningkatkan representasi data.
+- Transformasi fitur untuk meningkatkan representasi data.
 - Seleksi fitur untuk mengidentifikasi fitur yang paling informatif.
 - Dan masih banyak lagi.
 
