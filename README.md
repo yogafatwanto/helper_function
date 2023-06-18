@@ -27,7 +27,7 @@ Untuk menggunakan fungsi-fungsi dalam repositori ini, Anda dapat mengikuti langk
 from helper_function import get_auc
 ```
 
-3. Anda dapat menggunakan fungsi yang ada dalam modul tersebut dengan memanggilnya menggunakan sintaks `modul.nama_fungsi()`. Misalnya, untuk membuat plot, Anda dapat menggunakan fungsi `plotting.create_plot()`:
+3. Anda dapat menggunakan fungsi yang ada dalam modul tersebut dengan memanggilnya menggunakan sintaks `nama_fungsi()`. Misalnya, untuk mendapatkan auc, Anda dapat menggunakan fungsi `get_auc()`:
 
 ```python
 auc = get_auc(model, model_name, X_train, y_train, X_test, y_test)
